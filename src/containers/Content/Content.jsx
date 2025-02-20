@@ -1,5 +1,7 @@
 import AudioRecorder from "../../components/AudioRecorder";
 export const Content = () => {
+  // const [text, setText] = useState("");
+
   return (
     <div className="flex flex-col items-center gap-6 sm:gap-12 mt-4 ml-5 mr-5 mb-10 ">
       <h1 className="text-3xl mt-7 font-bold">Voice Note</h1>

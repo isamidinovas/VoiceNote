@@ -1,3 +1,4 @@
+import axios from "axios";
 import { motion } from "framer-motion";
 import { useRef, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
@@ -6,7 +7,7 @@ import { FaMicrophone } from "react-icons/fa";
 export const AudioRecorder = () => {
   const [audioUrl, setAudioUrl] = useState(null);
   const [isConfirmed, setIsConfirmed] = useState(false);
-
+  const [text, setText] = useState("ddssssssss");
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
 
@@ -58,6 +59,43 @@ export const AudioRecorder = () => {
     setIsConfirmed(false);
     toast.error("Запись удалена!");
   };
+  const uploadAudio = async () => {
+    console.log("Функция uploadAudio вызвана");
+    if (!audioUrl) {
+      toast.error("Нет аудиофайла для загрузки!");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append(
+      "audio_file",
+      new File([audioUrl], "recording.wav", { type: "audio/wav" })
+    );
+    formData.append("text_content", text);
+    console.log(
+      "FormData:",
+      formData.get("audio_file"),
+      formData.get("text_content")
+    );
+
+    try {
+      const response = await axios.post(
+        "http://127.0.0.1:8000/api/audio-text/",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      toast.success("Аудио успешно загружено!");
+      console.log("Ответ сервера:", response.data);
+    } catch (error) {
+      console.error("Ошибка загрузки аудио:", error);
+      toast.error("Ошибка при загрузке аудио!");
+    }
+  };
 
   return (
     <div className="flex flex-col items-center gap-4 p-4">
@@ -108,8 +146,14 @@ export const AudioRecorder = () => {
           )}
           {isConfirmed && (
             <>
-              <button className="rounded-xl bg-gray-900 p-3 pl-12 pr-12 text-white sm:mt-24 mt-10 font-bold">
-                Сохранить на базу
+              <button
+                onClick={() => {
+                  console.log("Кнопка нажата!");
+                  uploadAudio();
+                }}
+                className="rounded-xl bg-gray-900 p-3 pl-12 pr-12 text-white sm:mt-24 mt-10 font-bold"
+              >
+                Сохранить в базу
               </button>
             </>
           )}
