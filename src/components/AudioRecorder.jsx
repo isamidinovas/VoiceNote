@@ -4,10 +4,9 @@ import { useRef, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import { FaMicrophone } from "react-icons/fa";
 
-export const AudioRecorder = () => {
+export const AudioRecorder = ({ text, setText, onAudioSaved }) => {
   const [audioUrl, setAudioUrl] = useState(null);
   const [isConfirmed, setIsConfirmed] = useState(false);
-  const [text, setText] = useState("ddssssssss");
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
 
@@ -91,6 +90,14 @@ export const AudioRecorder = () => {
 
       toast.success("Аудио успешно загружено!");
       console.log("Ответ сервера:", response.data);
+      // Очищаем состояние после успешной загрузки
+      setAudioUrl(null);
+      setIsConfirmed(false);
+      setText("");
+      if (onAudioSaved) {
+        console.log("🔄 Обновляем текст после загрузки аудио...");
+        onAudioSaved();
+      }
     } catch (error) {
       console.error("Ошибка загрузки аудио:", error);
       toast.error("Ошибка при загрузке аудио!");
@@ -110,21 +117,25 @@ export const AudioRecorder = () => {
           },
         }}
       />
-      <motion.div
-        whileTap={{ scale: 1.2, opacity: 0.7 }}
-        transition={{ duration: 0.2 }}
-        className="p-2 cursor-pointer"
-        title="Записать аудио"
-      >
-        <FaMicrophone
-          size={48}
-          className="text-gray-900"
-          onMouseDown={startRecording} // Начинаем запись при нажатии
-          onMouseUp={stopRecording} // Останавливаем запись при отпускании
-          onTouchStart={startRecording} // Для мобильных устройств
-          onTouchEnd={stopRecording} // Для мобильных устройств
-        />
-      </motion.div>
+      {!isConfirmed ? (
+        <motion.div
+          whileTap={{ scale: 1.2, opacity: 0.7 }}
+          transition={{ duration: 0.2 }}
+          className="p-2 cursor-pointer"
+          title="Записать аудио"
+        >
+          <FaMicrophone
+            size={48}
+            className="text-gray-900"
+            onMouseDown={startRecording} // Начинаем запись при нажатии
+            onMouseUp={stopRecording} // Останавливаем запись при отпускании
+            onTouchStart={startRecording} // Для мобильных устройств
+            onTouchEnd={stopRecording} // Для мобильных устройств
+          />
+        </motion.div>
+      ) : (
+        ""
+      )}
       {audioUrl && (
         <div className="flex flex-col items-center gap-2 mt-4">
           <audio controls src={audioUrl} title="Воспроизвести"></audio>
